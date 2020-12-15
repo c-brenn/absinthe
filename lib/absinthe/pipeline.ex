@@ -41,7 +41,8 @@ defmodule Absinthe.Pipeline do
   @spec for_document(Absinthe.Schema.t()) :: t
   @spec for_document(Absinthe.Schema.t(), Keyword.t()) :: t
   def for_document(schema, options \\ []) do
-    options = options(Keyword.put(options, :schema, schema))
+    base_options = options(Keyword.put(options, :schema, schema))
+    options = Keyword.put(base_options, :context, %{})
 
     [
       Phase.Init,
@@ -67,7 +68,7 @@ defmodule Absinthe.Pipeline do
       Phase.Document.Validation.UniqueOperationNames,
       Phase.Document.Validation.UniqueVariableNames,
       # Apply Input
-      {Phase.Document.Context, options},
+      {Phase.Document.Context, base_options},
       {Phase.Document.Variables, options},
       Phase.Document.Validation.ProvidedNonNullVariables,
       Phase.Document.Arguments.Normalize,
@@ -78,7 +79,7 @@ defmodule Absinthe.Pipeline do
       # Process Arguments
       Phase.Document.Arguments.CoerceEnums,
       Phase.Document.Arguments.CoerceLists,
-      {Phase.Document.Arguments.Parse, options},
+      {Phase.Document.Arguments.Parse, base_options},
       Phase.Document.MissingVariables,
       Phase.Document.MissingLiterals,
       Phase.Document.Arguments.FlagInvalid,
